@@ -7,17 +7,21 @@ import {
   Typography,
   Paper,
   IconButton,
+  Alert,
 } from "@mui/material";
 import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { loginRequest } from "./slice/loginSlice";
 
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-    const [currentSlide, setCurrentSlide] = useState(0);
-    const dispatch=useDispatch()
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user, token, error } = useSelector((state) => state.auth);
 
 
   const slides = [
@@ -44,13 +48,21 @@ function Login() {
   }, [slides.length]);
 
 
+  useEffect(() => {
+    if (user && token) {
+      const role = user.role || 'Student';
+      const rolePath = role.toLowerCase();
+      navigate(`/${rolePath}/dashboard`);
+    }
+  }, [user, token, navigate]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
-    const payload={
-      email:email,
-      password:password
-    }
-    dispatch(loginRequest(payload))
+    const payload = {
+      email: email,
+      password: password
+    };
+    dispatch(loginRequest(payload));
   };
 
   return (
@@ -91,6 +103,11 @@ function Login() {
             Login
           </Typography>
 
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
           <Box
             component="form"
             onSubmit={handleLogin}
@@ -108,6 +125,7 @@ function Login() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
             />
             <TextField
               label="Password"
@@ -139,7 +157,7 @@ function Login() {
             <Typography variant="body2" align="center" sx={{ mt: 2 }}>
               Don't have an account?{" "}
               <span
-                onClick={() => {}}
+                onClick={() => navigate("/register")}
                 style={{
                   color: "#543098",
                   cursor: "pointer",
@@ -148,6 +166,9 @@ function Login() {
               >
                 Register
               </span>
+            </Typography>
+            <Typography variant="caption" align="center" sx={{ mt: 1, display: 'block', color: 'text.secondary' }}>
+              Test roles: Use email with "admin", "coach", or "parent" to test different dashboards
             </Typography>
           </Box>
         </Paper>

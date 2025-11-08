@@ -12,6 +12,10 @@ import { loginApi, registerApi } from "../api/loginApi";
 function* handleLogin(action) {
   try {
     const response = yield call(loginApi, action.payload);
+    // Store token in localStorage
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
     yield put(loginSuccess(response.data));
   } catch (error) {
     yield put(loginFailure(error.response?.data?.message || "Login failed"));
@@ -21,6 +25,10 @@ function* handleLogin(action) {
 function* handleRegister(action) {
   try {
     const response = yield call(registerApi, action.payload);
+    // Store token in localStorage
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
     yield put(registerSuccess(response.data));
   } catch (error) {
     yield put(

@@ -9,17 +9,49 @@ import {
   IconButton,
 } from "@mui/material";
 import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
-import { useDispatch } from "react-redux";
-import { loginRequest } from "./slice/loginSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { loginAsync } from "./saga/loginSaga";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../auth/auth";
 
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-    const [currentSlide, setCurrentSlide] = useState(0);
-    const dispatch=useDispatch()
-    const navigate=useNavigate()
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user: authUser, setUser } = useAuth();
+  const { user, token, loading, error } = useSelector((state) => state.auth);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    const storedToken = localStorage.getItem("authToken");
+    if (storedToken && authUser?.isAuthenticated) {
+      navigate("/");
+    }
+  }, [authUser, navigate]);
+
+  // Navigate to dashboard after successful login
+useEffect(() => {
+  if (user && token && !loading) {
+    const authData = {
+      isAuthenticated: true,
+      role: user.role?.toLowerCase(),
+      name: user.name,
+    };
+
+    // ✅ Update context
+    setUser(authData);
+
+    // ✅ Redirect based on role
+    const role = authData.role;
+    if (role === "admin") navigate("/admin/dashboard", { replace: true });
+    else if (role === "coach") navigate("/coach/dashboard", { replace: true });
+    else if (role === "parent") navigate("/parent/dashboard", { replace: true });
+    else navigate("/student/dashboard", { replace: true });
+  }
+}, [user, token, loading, navigate, setUser]);
 
   const slides = [
     {
@@ -47,11 +79,11 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const payload={
-      email:email,
-      password:password
-    }
-    dispatch(loginRequest(payload))
+    const credentials = {
+      email: email,
+      password: password
+    };
+    dispatch(loginAsync(credentials));
   };
 
   return (
@@ -146,7 +178,7 @@ function Login() {
                   cursor: "pointer",
                   fontWeight: "bold",
                 }}
-              >
+              >+
                 Register
               </span>
             </Typography>

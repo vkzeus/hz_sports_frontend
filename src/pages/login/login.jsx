@@ -11,6 +11,7 @@ import {
 import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { loginRequest } from "./slice/loginSlice";
+import { useNavigate } from "react-router-dom";
 
 
 function Login() {
@@ -18,7 +19,7 @@ function Login() {
   const [password, setPassword] = useState("");
     const [currentSlide, setCurrentSlide] = useState(0);
     const dispatch=useDispatch()
-
+    const navigate=useNavigate()
 
   const slides = [
     {
@@ -139,7 +140,7 @@ function Login() {
             <Typography variant="body2" align="center" sx={{ mt: 2 }}>
               Don't have an account?{" "}
               <span
-                onClick={() => {}}
+                onClick={() => navigate("/register")}
                 style={{
                   color: "#543098",
                   cursor: "pointer",
